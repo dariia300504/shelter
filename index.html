@@ -1,0 +1,696 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Дім для друга</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap">
+<style>
+/* Прототип за макетом рис. 4.4: шапка з брендом і меню, степер 4 кроки, анкета з 4 блоків, картки рекомендацій із фото, відсотком, бейджем і поясненням */
+:root {
+  --bg: #eef4f2;
+  --surface: #ffffff;
+  --surface-2: #f3f7f6;
+  --fg: #142824;
+  --muted: #5d6f6a;
+  --line: #d6e3df;
+  --accent: #1f7a64;
+  --accent-ink: #ffffff;
+  --accent-soft: #dff0ea;
+  --prio: #d13f6c;
+  --prio-soft: #fde4ec;
+  --warn: #93600a;
+  --warn-soft: #fbf0d9;
+  --bad: #b3261e;
+  --font: "Manrope", "Segoe UI", system-ui, sans-serif;
+  --radius: 14px;
+  --shadow: 0 1px 2px rgba(20,40,36,.06), 0 4px 16px rgba(20,40,36,.05);
+}
+:root { color-scheme: light; }
+:root[data-theme="dark"] {
+  --bg: #0e1715; --surface: #16221f; --surface-2: #1c2a27; --fg: #e4efec; --muted: #9bb0aa;
+  --line: #2a3b37; --accent: #46c29f; --accent-ink: #04201a; --accent-soft: #163a31;
+  --prio: #ff7fa6; --prio-soft: #3e1a26; --warn: #f0b75c; --warn-soft: #3a2b10; --bad: #ff8a80;
+  --shadow: none; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--fg); font-family: var(--font); font-size: 15px; line-height: 1.5; }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--surface); }
+.wrap { max-width: 1000px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+button, select, input { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* шапка */
+header.bar { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 6; background: var(--surface); border-bottom: 1px solid var(--line); }
+.bar .wrap { display: flex; align-items: center; gap: 12px; padding-block: 10px; }
+.brand { display: flex; align-items: center; gap: 10px; margin-right: auto; background: none; border: 0; padding: 0; cursor: pointer; text-align: left; }
+.brand svg { width: 34px; height: 34px; color: var(--accent); flex: none; }
+.brand b { display: block; font-weight: 800; font-size: 17px; line-height: 1.15; }
+.brand small { color: var(--muted); font-size: 12px; }
+.menu-btn { width: 42px; height: 42px; border-radius: 10px; border: 1px solid var(--line); background: var(--surface); cursor: pointer; display: grid; place-items: center; }
+.menu-btn svg { width: 22px; height: 22px; }
+.menu { position: absolute; right: max(16px, env(safe-area-inset-right, 0px)); top: 60px; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,.12); padding: 6px; min-width: 230px; }
+.menu button { display: block; width: 100%; text-align: left; background: none; border: 0; padding: 10px 12px; border-radius: 8px; cursor: pointer; font-weight: 600; }
+.menu button:hover { background: var(--surface-2); }
+
+main { padding-block: 22px 56px; }
+
+/* степер */
+.stepper { list-style: none; display: grid; grid-template-columns: repeat(4, 1fr); margin: 0 0 24px; padding: 0; position: relative; }
+.stepper li { display: grid; justify-items: center; gap: 6px; position: relative; font-size: 13px; color: var(--muted); font-weight: 600; text-align: center; }
+.stepper li::before { content: ""; position: absolute; top: 17px; left: -50%; width: 100%; height: 3px; background: var(--line); z-index: 0; }
+.stepper li:first-child::before { display: none; }
+.stepper li.done::before, .stepper li.on::before { background: var(--accent); }
+.stepper .dot { width: 36px; height: 36px; border-radius: 50%; border: 2px solid var(--line); background: var(--surface); display: grid; place-items: center; font-weight: 700; position: relative; z-index: 1; font-variant-numeric: tabular-nums; }
+.stepper li.on { color: var(--accent); }
+.stepper li.on .dot, .stepper li.done .dot { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+
+h1 { font-size: clamp(24px, 4vw, 32px); font-weight: 800; line-height: 1.15; margin: 0 0 8px; letter-spacing: -.01em; }
+.lead { color: var(--muted); margin: 0 0 20px; max-width: 64ch; font-size: 16px; }
+.demo-note { display: inline-block; font-size: 12px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; color: var(--warn); background: var(--warn-soft); padding: 3px 10px; border-radius: 999px; margin-bottom: 10px; }
+
+/* анкета */
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.block { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px 18px 18px; box-shadow: var(--shadow); min-width: 0; }
+.block.wide { grid-column: 1 / -1; }
+.block h2 { margin: 0 0 4px; font-size: 15px; font-weight: 800; display: flex; align-items: center; gap: 8px; }
+.block h2 svg { width: 18px; height: 18px; color: var(--accent); }
+.fields { display: grid; gap: 12px; margin-top: 10px; }
+.fields.cols3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.f { display: grid; gap: 5px; min-width: 0; }
+.f label { font-size: 13px; font-weight: 600; color: var(--muted); }
+.f select { appearance: none; width: 100%; border: 1px solid var(--line); border-radius: 10px; padding: 10px 36px 10px 12px; background: var(--surface) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%235d6f6a' stroke-width='1.8' stroke-linecap='round'/%3E%3C/svg%3E") no-repeat right 12px center; }
+.check { display: flex; gap: 8px; align-items: flex-start; font-size: 13px; color: var(--muted); }
+.check input { margin-top: 3px; accent-color: var(--accent); }
+.form-foot { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; margin-top: 18px; }
+.btn { border: 1px solid var(--line); background: var(--surface); border-radius: 10px; padding: 11px 20px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; justify-content: center; }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.btn.ghost { color: var(--accent); border-color: var(--accent); background: var(--surface); }
+.btn.link { border: 0; background: none; color: var(--accent); padding: 8px 4px; }
+.btn:disabled { opacity: .45; cursor: not-allowed; }
+.err { color: var(--bad); font-weight: 600; font-size: 14px; }
+
+/* рекомендації */
+.toolbar { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; flex-wrap: wrap; }
+.toolbar label { font-size: 14px; color: var(--muted); font-weight: 600; }
+.toolbar select { appearance: none; border: 1px solid var(--line); border-radius: 10px; padding: 9px 36px 9px 12px; background: var(--surface) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%235d6f6a' stroke-width='1.8' stroke-linecap='round'/%3E%3C/svg%3E") no-repeat right 12px center; font-weight: 600; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; margin: -6px 0 16px; }
+.chip { font-size: 12px; padding: 3px 10px; border-radius: 999px; background: var(--surface); border: 1px solid var(--line); color: var(--muted); }
+.cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(420px, 1fr)); gap: 14px; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 14px; box-shadow: var(--shadow); display: grid; grid-template-columns: 112px 1fr auto; gap: 6px 14px; align-content: start; }
+.photo { grid-row: 1 / span 2; width: 112px; height: 112px; border-radius: 12px; overflow: hidden; }
+.photo svg { width: 100%; height: 100%; display: block; }
+.card h3 { margin: 0; font-size: 18px; font-weight: 800; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.badge { font-size: 12px; font-weight: 700; padding: 2px 10px; border-radius: 999px; background: var(--prio-soft); color: var(--prio); }
+.meta { color: var(--muted); font-size: 13px; margin: 2px 0 0; }
+.pct { text-align: right; }
+.pct b { display: block; font-size: 24px; font-weight: 800; color: var(--accent); line-height: 1; font-variant-numeric: tabular-nums; }
+.pct small { font-size: 11px; color: var(--muted); }
+.why { grid-column: 2 / -1; font-size: 14px; }
+.why p { margin: 0 0 2px; font-weight: 700; }
+.why ul { margin: 0; padding-left: 0; list-style: none; display: grid; gap: 2px; }
+.why li { color: var(--muted); padding-left: 14px; position: relative; }
+.why li::before { content: ""; position: absolute; left: 2px; top: .62em; width: 5px; height: 5px; border-radius: 50%; background: var(--accent); }
+.card .acts { grid-column: 1 / -1; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 8px; }
+.details { grid-column: 1 / -1; border-top: 1px solid var(--line); margin-top: 8px; padding-top: 10px; font-size: 13px; }
+.details dl { display: grid; grid-template-columns: max-content 1fr; gap: 3px 14px; margin: 0 0 10px; }
+.details dt { color: var(--muted); }
+.details dd { margin: 0; }
+.bars { display: grid; gap: 6px; }
+.barrow { display: grid; grid-template-columns: 150px 1fr 74px; gap: 10px; align-items: center; }
+.track { height: 7px; background: var(--surface-2); border-radius: 99px; overflow: hidden; border: 1px solid var(--line); }
+.fill { height: 100%; background: var(--accent); }
+.barrow .v { text-align: right; color: var(--muted); font-variant-numeric: tabular-nums; }
+.calc { color: var(--muted); margin-top: 8px; }
+.more { display: flex; justify-content: center; margin-top: 12px; }
+.excluded { margin-top: 22px; background: var(--surface); border: 1px dashed var(--line); border-radius: var(--radius); padding: 14px 16px; }
+.excluded h2 { font-size: 15px; margin: 0; }
+.excluded ul { margin: 8px 0 0; padding-left: 18px; color: var(--muted); font-size: 14px; }
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 18px; box-shadow: var(--shadow); min-width: 0; }
+
+/* зустріч і усиновлення */
+.two { display: grid; grid-template-columns: 320px 1fr; gap: 16px; align-items: start; }
+.pet-mini { display: grid; gap: 10px; }
+.pet-mini .photo { width: 100%; height: 220px; }
+.pet-mini h3 { margin: 0; font-size: 20px; font-weight: 800; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.slots { display: flex; flex-wrap: wrap; gap: 8px; }
+.slots label input { position: absolute; opacity: 0; pointer-events: none; }
+.slots label span { display: inline-block; border: 1px solid var(--line); border-radius: 10px; padding: 8px 14px; font-weight: 600; cursor: pointer; font-variant-numeric: tabular-nums; }
+.slots label input:checked + span { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.slots label input:focus-visible + span { outline: 2px solid var(--accent); outline-offset: 2px; }
+.inp { width: 100%; border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; background: var(--surface); }
+.ok-box { background: var(--accent-soft); color: var(--fg); border-radius: 12px; padding: 14px 16px; }
+.ok-box b { color: var(--accent); }
+.timeline { list-style: none; padding: 0; margin: 14px 0 0; display: grid; gap: 10px; }
+.timeline li { display: grid; grid-template-columns: 26px 1fr; gap: 10px; align-items: start; }
+.timeline .tdot { width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center; background: var(--surface-2); border: 1px solid var(--line); font-size: 12px; font-weight: 700; }
+.timeline li.done .tdot { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.timeline small { color: var(--muted); display: block; }
+.btn-row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 16px; }
+
+/* адміністратор */
+.admin-grid { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 16px; align-items: start; }
+.wrow { display: grid; grid-template-columns: 1fr 56px; gap: 4px 12px; align-items: center; margin-bottom: 10px; }
+.wrow label { font-size: 14px; font-weight: 600; }
+.wrow input { grid-column: 1 / -1; width: 100%; accent-color: var(--accent); }
+.wrow output { text-align: right; font-weight: 700; font-variant-numeric: tabular-nums; }
+.sum { display: flex; justify-content: space-between; padding: 10px 12px; border-radius: 10px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.sum.ok { background: var(--accent-soft); color: var(--accent); }
+.sum.bad { background: var(--warn-soft); color: var(--warn); }
+.preview ol { margin: 0; padding-left: 22px; display: grid; gap: 6px; }
+.delta { font-size: 12px; color: var(--muted); }
+.tbl-wrap { overflow-x: auto; margin-top: 12px; }
+table { border-collapse: collapse; width: 100%; font-size: 13px; min-width: 640px; }
+th, td { text-align: left; padding: 7px 8px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+th { color: var(--muted); font-size: 12px; font-weight: 700; }
+.st { font-size: 12px; font-weight: 700; padding: 2px 8px; border-radius: 99px; background: var(--surface-2); }
+.st.available { background: var(--accent-soft); color: var(--accent); }
+.st.booked { background: var(--warn-soft); color: var(--warn); }
+.st.adopted { background: var(--prio-soft); color: var(--prio); }
+.log { font-size: 13px; color: var(--muted); }
+footer { color: var(--muted); font-size: 12px; padding-block: 0 36px; }
+
+@media (max-width: 760px) {
+  .form-grid, .two, .admin-grid { grid-template-columns: 1fr; }
+  .fields.cols3 { grid-template-columns: 1fr 1fr; }
+  .cards { grid-template-columns: 1fr; }
+  .card { grid-template-columns: 92px 1fr auto; }
+  .photo { width: 92px; height: 92px; }
+  .why { grid-column: 1 / -1; }
+  .stepper li { font-size: 11px; }
+  .barrow { grid-template-columns: 1fr 70px; }
+  .barrow .track { grid-column: 1 / -1; grid-row: 2; }
+  .pet-mini .photo { height: 180px; }
+}
+@media (prefers-reduced-motion: no-preference) { .fill { transition: width .4s ease; } }
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+  <symbol id="i-paw" viewBox="0 0 64 64"><g fill="currentColor"><ellipse cx="17" cy="25" rx="6.5" ry="8.5"/><ellipse cx="47" cy="25" rx="6.5" ry="8.5"/><ellipse cx="26.5" cy="12.5" rx="6" ry="8"/><ellipse cx="37.5" cy="12.5" rx="6" ry="8"/><path d="M32 30c-9.5 0-18 10.5-18 18 0 6 5 8.5 9.5 7.3 3-.8 5.5-2.3 8.5-2.3s5.5 1.5 8.5 2.3c4.5 1.2 9.5-1.3 9.5-7.3 0-7.5-8.5-18-18-18z"/></g></symbol>
+  <symbol id="i-home" viewBox="0 0 24 24"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z" fill="currentColor"/></symbol>
+  <symbol id="i-star" viewBox="0 0 24 24"><path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z" fill="currentColor"/></symbol>
+  <symbol id="i-heart" viewBox="0 0 24 24"><path d="M12 20s-7-4.4-9-9a5 5 0 0 1 9-3 5 5 0 0 1 9 3c-2 4.6-9 9-9 9z" fill="currentColor"/></symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2.2"/><path d="M12 7v5l3 2" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></symbol>
+</defs></svg>
+
+<header class="bar">
+  <div class="wrap">
+    <button class="brand" type="button" id="brand" aria-label="На початок">
+      <svg aria-hidden="true"><use href="#i-paw"/></svg>
+      <span><b>Дім для друга</b><small>Підбір тварини з притулку</small></span>
+    </button>
+    <button class="menu-btn" type="button" id="menuBtn" aria-label="Меню" aria-expanded="false" aria-controls="menu">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
+    </button>
+    <div class="menu" id="menu" hidden>
+      <button type="button" data-go="anketa">Нова анкета</button>
+      <button type="button" data-go="rekomendacii">Мої рекомендації</button>
+      <button type="button" data-go="admin">Панель адміністратора</button>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+  <ol class="stepper" id="stepper" aria-label="Етапи">
+    <li data-s="1"><span class="dot">1</span>Анкета</li>
+    <li data-s="2"><span class="dot">2</span>Рекомендації</li>
+    <li data-s="3"><span class="dot">3</span>Зустріч</li>
+    <li data-s="4"><span class="dot">4</span>Усиновлення</li>
+  </ol>
+
+  <!-- 1. Анкета -->
+  <section id="v-anketa">
+    <span class="demo-note">Прототип · умовні дані</span>
+    <h1>Анкета</h1>
+    <p class="lead">Розкажіть трохи про себе, щоб ми могли підібрати тварину, яка найкраще підходить до вашого способу життя.</p>
+    <form id="form" novalidate>
+      <div class="form-grid">
+        <div class="block">
+          <h2><svg aria-hidden="true"><use href="#i-home"/></svg>1. Інформація про житло</h2>
+          <div class="fields">
+            <div class="f"><label for="housing">Тип житла</label>
+              <select id="housing"><option value="apartment">Квартира</option><option value="house">Приватний будинок</option></select></div>
+            <div class="f"><label for="yard">Чи є подвір'я?</label>
+              <select id="yard"><option value="0">Ні</option><option value="1">Так</option></select></div>
+          </div>
+        </div>
+        <div class="block">
+          <h2><svg aria-hidden="true"><use href="#i-star"/></svg>2. Досвід та умови</h2>
+          <div class="fields">
+            <div class="f"><label for="exp">Досвід тримання тварин</label>
+              <select id="exp"><option value="0">Немає досвіду</option><option value="1" selected>Так, є досвід</option><option value="2">Значний досвід</option></select></div>
+            <div class="f"><label for="kids">Наявність дітей</label>
+              <select id="kids"><option value="0">Ні</option><option value="1">Так</option></select></div>
+            <div class="f"><label for="pets">Інші тварини</label>
+              <select id="pets"><option value="0">Ні</option><option value="1">Так</option></select></div>
+          </div>
+        </div>
+        <div class="block wide">
+          <h2><svg aria-hidden="true"><use href="#i-heart"/></svg>3. Побажання щодо тварини</h2>
+          <div class="fields cols3">
+            <div class="f"><label for="species">Вид</label>
+              <select id="species"><option value="cat">Кіт</option><option value="dog">Собака</option><option value="any">Будь-який</option></select></div>
+            <div class="f"><label for="size">Розмір</label>
+              <select id="size"><option value="">Не має значення</option><option value="small">Малий</option><option value="medium">Середній</option><option value="large">Великий</option></select></div>
+            <div class="f"><label for="age">Вік</label>
+              <select id="age"><option value="0-240">Будь-який</option><option value="0-12">До 1 року</option><option value="12-60">1–5 років</option><option value="36-96">3–8 років</option><option value="84-240">Понад 7 років</option></select></div>
+            <div class="f"><label for="activity">Рівень активності</label>
+              <select id="activity"><option value="0.1">Дуже спокійний</option><option value="0.3">Спокійний</option><option value="0.5" selected>Помірний</option><option value="0.7">Активний</option><option value="0.9">Дуже активний</option></select></div>
+            <div class="f"><label for="breed">Порода</label>
+              <select id="breed"><option value="">Не має значення</option><option value="mix">Безпородна (метис)</option><option value="pure">Породиста</option></select></div>
+          </div>
+          <label class="check" style="margin-top:12px"><input type="checkbox" id="allowOther" checked> Готові розглянути й тварину іншого виду, якщо вона дуже підходить</label>
+        </div>
+        <div class="block wide">
+          <h2><svg aria-hidden="true"><use href="#i-clock"/></svg>4. Часовий ресурс</h2>
+          <div class="fields">
+            <div class="f"><label for="time">Скільки часу ви готові приділяти тварині?</label>
+              <select id="time"><option value="0.5">До 1 години</option><option value="1.5">1–2 години</option><option value="3" selected>2–4 години</option><option value="5">Понад 4 години</option></select></div>
+          </div>
+        </div>
+      </div>
+      <div class="form-foot">
+        <label class="check"><input type="checkbox" id="consent" checked> Погоджуюся на обробку даних анкети для підбору тварини</label>
+        <button class="btn primary" type="submit">Далі <span aria-hidden="true">→</span></button>
+      </div>
+      <p class="err" id="formErr" role="alert"></p>
+    </form>
+  </section>
+
+  <!-- 2. Рекомендації -->
+  <section id="v-rekomendacii" hidden>
+    <h1>Рекомендовані тварини</h1>
+    <p class="lead" id="recLead"></p>
+    <div class="chips" id="chips"></div>
+    <div class="toolbar">
+      <label for="sort">Сортувати:</label>
+      <select id="sort"><option value="score">За сумісністю</option><option value="prio">Спочатку пріоритетні</option><option value="stay">Найдовше в притулку</option></select>
+      <button class="btn link" type="button" data-go="anketa">Змінити анкету</button>
+    </div>
+    <div class="cards" id="cards"></div>
+    <div class="more" id="more"></div>
+    <div class="excluded" id="excluded" hidden></div>
+  </section>
+
+  <!-- 3. Зустріч -->
+  <section id="v-zustrich" hidden>
+    <h1>Запис на зустріч</h1>
+    <p class="lead">Оберіть зручну дату й час. Притулок отримає ваші контакти лише після підтвердження запису.</p>
+    <div class="two">
+      <div class="panel pet-mini" id="meetPet"></div>
+      <div class="panel" id="meetBox"></div>
+    </div>
+  </section>
+
+  <!-- 4. Усиновлення -->
+  <section id="v-usynovlennia" hidden>
+    <h1>Усиновлення</h1>
+    <p class="lead" id="adoptLead"></p>
+    <div class="two">
+      <div class="panel pet-mini" id="adoptPet"></div>
+      <div class="panel" id="adoptBox"></div>
+    </div>
+  </section>
+
+  <!-- Адміністратор -->
+  <section id="v-admin" hidden>
+    <h1>Панель адміністратора</h1>
+    <p class="lead">Ваги визначають, наскільки кожен критерій впливає на бал сумісності. Сума ваг має дорівнювати 1. Праворуч видно, як зміниться рейтинг для поточної анкети.</p>
+    <div class="admin-grid">
+      <div class="panel">
+        <div id="wrows"></div>
+        <div class="wrow"><label for="w-bonus">Бонус пріоритету (Δ)</label><output id="o-bonus"></output><input type="range" id="w-bonus" min="0" max="0.2" step="0.01"></div>
+        <div class="sum" id="sumBox"></div>
+        <div class="btn-row">
+          <button class="btn primary" type="button" id="apply">Застосувати</button>
+          <button class="btn" type="button" id="normalize">Нормувати до 1</button>
+          <button class="btn" type="button" id="reset">Базові ваги</button>
+        </div>
+        <p class="log" id="wLog"></p>
+      </div>
+      <div class="panel preview">
+        <h2 style="font-size:15px;margin:0 0 10px">Перші 5 позицій з новими вагами</h2>
+        <ol id="preview"></ol>
+      </div>
+    </div>
+    <div class="panel" style="margin-top:16px">
+      <h2 style="font-size:15px;margin:0">Тварини в притулках</h2>
+      <div class="tbl-wrap"><table>
+        <thead><tr><th>Кличка</th><th>Вид</th><th>Вік</th><th>Розмір</th><th>Активність</th><th>У притулку</th><th>Пріоритет</th><th>Статус</th></tr></thead>
+        <tbody id="tbody"></tbody>
+      </table></div>
+      <div class="btn-row"><button class="btn" type="button" id="resetStatus">Скинути статуси тварин</button></div>
+    </div>
+  </section>
+</main>
+<footer class="wrap">Прототип системи підтримки прийняття рішень персоналізованого підбору домашньої тварини із притулку. Тварини, притулки й записи умовні; дані зберігаються лише до перезавантаження сторінки.</footer>
+
+<script>
+(() => {
+  const $ = id => document.getElementById(id);
+  const TODAY = new Date();
+  const SH = { a: "Притулок «Теплий кут»", b: "Притулок «Друга лапа»" };
+  // fur: основний колір, f2: світлі ділянки, bg: фон фото, pat: смуги/плями
+  const ANIMALS = [
+    { id: 1, name: "Луна", species: "cat", breed: "метиска", pure: false, age: 24, size: "medium", act: 0.5, exp: 1, care: 1.5, kids: true, pets: true, intake: 140, prio: "Евакуйована з Харківщини", sex: "кішка", fur: "#9a8670", f2: "#e9e1d4", pat: "#5d4f40", bg: "#e5efe9", shelter: "a", desc: "Лагідна, любить сидіти на підвіконні, привчена до лотка." },
+    { id: 2, name: "Байра", species: "dog", breed: "метиска", pure: false, age: 36, size: "medium", act: 0.5, exp: 1, care: 2.0, kids: true, pets: true, intake: 75, prio: "Евакуйована з Донеччини", sex: "собака", fur: "#a2582a", f2: "#f4ece2", pat: null, bg: "#f3e7dc", shelter: "a", desc: "Дуже контактна, добре ходить на повідку, знає базові команди." },
+    { id: 3, name: "Мурчик", species: "cat", breed: "метис", pure: false, age: 12, size: "small", act: 0.3, exp: 0, care: 0.5, kids: true, pets: true, intake: 40, prio: "", sex: "кіт", fur: "#8d8c86", f2: "#ecebe6", pat: "#4b4a46", bg: "#e8ecef", shelter: "b", desc: "Спокійний, любить гратися з м'ячиком, швидко звикає до людей." },
+    { id: 4, name: "Боня", species: "cat", breed: "європейська", pure: true, age: 72, size: "small", act: 0.3, exp: 0, care: 1.0, kids: true, pets: true, intake: 150, prio: "", sex: "кішка", fur: "#2f2b29", f2: "#f2efea", pat: null, bg: "#efe8f1", shelter: "b", desc: "Спокійна доросла кішка, підійде для квартири." },
+    { id: 5, name: "Барсик", species: "dog", breed: "метис", pure: false, age: 36, size: "small", act: 0.5, exp: 1, care: 1.5, kids: true, pets: true, intake: 160, prio: "Евакуйований з Херсонщини", sex: "пес", fur: "#d8b27a", f2: "#fbf3e6", pat: null, bg: "#f6eedb", shelter: "a", desc: "Невеликий і веселий, любить прогулянки, ладнає з котами." },
+    { id: 6, name: "Річі", species: "dog", breed: "бігль-метис", pure: false, age: 48, size: "medium", act: 0.3, exp: 1, care: 2.0, kids: false, pets: true, intake: 90, prio: "", sex: "пес", fur: "#b06d33", f2: "#f7efe4", pat: "#3a2c22", bg: "#efe6da", shelter: "b", desc: "Урівноважений, потребує дому без маленьких дітей." },
+    { id: 7, name: "Рекс", species: "dog", breed: "вівчарка-метис", pure: false, age: 24, size: "large", act: 0.7, exp: 2, care: 2.5, kids: true, pets: true, intake: 30, prio: "Евакуйований із Запоріжжя", sex: "пес", fur: "#5b3d22", f2: "#c99a62", pat: null, bg: "#e7ebe0", shelter: "a", desc: "Великий і активний, потрібне подвір'я й досвідчений власник." },
+    { id: 8, name: "Джек", species: "dog", breed: "метис", pure: false, age: 36, size: "medium", act: 0.5, exp: 1, care: 2.0, kids: true, pets: true, intake: 60, prio: "", sex: "пес", fur: "#2e2a27", f2: "#d9c3a5", pat: null, bg: "#e6ecef", shelter: "a", desc: "Дружелюбний, уже має запис на зустріч від іншої родини.", status: "booked" },
+    { id: 9, name: "Сніжка", species: "cat", breed: "турецька ангора", pure: true, age: 96, size: "small", act: 0.1, exp: 0, care: 0.5, kids: true, pets: false, intake: 300, prio: "", sex: "кішка", fur: "#f1eee8", f2: "#ffffff", pat: null, bg: "#e3ebf2", shelter: "b", desc: "Дуже спокійна, має бути єдиною твариною в домі." },
+    { id: 10, name: "Граф", species: "dog", breed: "ротвейлер-метис", pure: false, age: 84, size: "large", act: 0.3, exp: 1, care: 1.5, kids: true, pets: true, intake: 400, prio: "", sex: "пес", fur: "#24201e", f2: "#9b5c2e", pat: null, bg: "#ece7e1", shelter: "a", desc: "Спокійний старший пес, найдовше чекає на дім." },
+    { id: 11, name: "Ластівка", species: "cat", breed: "метиска", pure: false, age: 18, size: "small", act: 0.7, exp: 0, care: 1.0, kids: false, pets: true, intake: 20, prio: "", sex: "кішка", fur: "#c77b3c", f2: "#f7e9d8", pat: "#8b4a1d", bg: "#f5e9de", shelter: "b", desc: "Грайлива молода кішка, краще без маленьких дітей." },
+    { id: 12, name: "Тайсон", species: "dog", breed: "малінуа", pure: true, age: 30, size: "large", act: 0.9, exp: 2, care: 3.5, kids: false, pets: false, intake: 200, prio: "", sex: "пес", fur: "#b3874f", f2: "#3a2d22", pat: null, bg: "#eee9df", shelter: "a", desc: "Робочий пес, потрібні щоденні тренування й великий досвід." },
+    { id: 13, name: "Ґудзик", species: "dog", breed: "тер'єр-метис", pure: false, age: 8, size: "small", act: 0.9, exp: 1, care: 3.0, kids: true, pets: true, intake: 15, prio: "", sex: "пес", fur: "#efe7da", f2: "#ffffff", pat: "#8c6a46", bg: "#e5eee9", shelter: "b", desc: "Енергійне цуценя, потребує багато уваги та ігор." },
+    { id: 14, name: "Мася", species: "cat", breed: "метиска", pure: false, age: 48, size: "small", act: 0.3, exp: 0, care: 0.5, kids: true, pets: true, intake: 220, prio: "Евакуйована з Миколаївщини", sex: "кішка", fur: "#e0a25e", f2: "#fdf3e5", pat: "#b0682a", bg: "#f4ecdf", shelter: "a", desc: "Ніжна і спокійна, ладнає з дітьми й іншими тваринами." }
+  ];
+  ANIMALS.forEach(a => { a.status = a.status || "available"; a.status0 = a.status; });
+
+  const CRIT = [
+    { code: "species", name: "Вид тварини" }, { code: "activity", name: "Рівень активності" },
+    { code: "exp", name: "Досвід утримання" }, { code: "time", name: "Час на догляд" },
+    { code: "age", name: "Вік тварини" }, { code: "stay", name: "Термін у притулку" }
+  ];
+  const BASE_W = { species: .20, activity: .20, exp: .15, time: .15, age: .15, stay: .15 }, BASE_BONUS = .05;
+  let W = { ...BASE_W }, BONUS = BASE_BONUS, dW = { ...BASE_W }, dB = BASE_BONUS;
+  let profile = null, shown = 5, chosen = null, meeting = null;
+
+  const r2 = x => Math.round(x * 100) / 100;
+  const fmt = x => x.toFixed(2).replace(".", ",");
+  const SIZE_UA = { small: "Малий", medium: "Середній", large: "Великий" };
+  const ACT_UA = v => v <= .1 ? "дуже спокійна" : v <= .3 ? "спокійна" : v <= .5 ? "помірно активна" : v <= .7 ? "активна" : "дуже активна";
+  const SP_UA = a => a.species === "cat" ? "Кіт" : "Пес";
+  const ageUa = m => { if (m < 12) return m + " міс."; const y = Math.round(m / 12); return y + (y % 10 === 1 && y % 100 !== 11 ? " рік" : [2,3,4].includes(y % 10) && ![12,13,14].includes(y % 100) ? " роки" : " років"); };
+  const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+
+  // ---------- Портрети (SVG) ----------
+  function portrait(a) {
+    const f = a.fur, l = a.f2, p = a.pat, bg = a.bg;
+    if (a.species === "cat") {
+      const stripes = p ? `<path d="M88 52q12 6 24 0M84 64q16 7 32 0M70 92q8 2 12 8M130 92q-8 2-12 8" stroke="${p}" stroke-width="4" fill="none" stroke-linecap="round" opacity=".75"/>` : "";
+      return `<svg viewBox="0 0 200 200" role="img" aria-label="${esc(a.name)}"><rect width="200" height="200" fill="${bg}"/>
+        <ellipse cx="100" cy="196" rx="70" ry="44" fill="${f}"/><ellipse cx="100" cy="190" rx="34" ry="30" fill="${l}"/>
+        <path d="M46 70L52 18 92 46z" fill="${f}"/><path d="M154 70L148 18 108 46z" fill="${f}"/>
+        <path d="M56 58L58 32 80 48z" fill="#e7a9a9" opacity=".8"/><path d="M144 58L142 32 120 48z" fill="#e7a9a9" opacity=".8"/>
+        <ellipse cx="100" cy="94" rx="62" ry="56" fill="${f}"/>${stripes}
+        <ellipse cx="100" cy="122" rx="30" ry="22" fill="${l}"/>
+        <ellipse cx="76" cy="90" rx="11" ry="12" fill="#c9d65a"/><ellipse cx="124" cy="90" rx="11" ry="12" fill="#c9d65a"/>
+        <ellipse cx="76" cy="91" rx="4" ry="10" fill="#1d1d1b"/><ellipse cx="124" cy="91" rx="4" ry="10" fill="#1d1d1b"/>
+        <circle cx="79" cy="86" r="2.4" fill="#fff"/><circle cx="127" cy="86" r="2.4" fill="#fff"/>
+        <path d="M93 112h14l-7 8z" fill="#d98a8f"/><path d="M100 120q-6 8-13 5M100 120q6 8 13 5" stroke="#4a3b35" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+        <path d="M66 118L36 112M66 124L36 128M134 118L164 112M134 124L164 128" stroke="#fff" stroke-width="1.6" opacity=".8"/></svg>`;
+    }
+    const spot = p ? `<ellipse cx="78" cy="84" rx="20" ry="18" fill="${p}" opacity=".85"/>` : "";
+    return `<svg viewBox="0 0 200 200" role="img" aria-label="${esc(a.name)}"><rect width="200" height="200" fill="${bg}"/>
+      <ellipse cx="100" cy="200" rx="72" ry="46" fill="${f}"/><ellipse cx="100" cy="194" rx="32" ry="30" fill="${l}"/>
+      <ellipse cx="100" cy="92" rx="56" ry="58" fill="${f}"/>${spot}
+      <path d="M48 62q-22 10-16 58 4 18 20 10 8-30 10-58z" fill="${p || f}" style="filter:brightness(.82)"/>
+      <path d="M152 62q22 10 16 58-4 18-20 10-8-30-10-58z" fill="${p || f}" style="filter:brightness(.82)"/>
+      <path d="M100 70q-14 0-16 30-10 6-10 22 0 26 26 26t26-26q0-16-10-22-2-30-16-30z" fill="${l}"/>
+      <circle cx="78" cy="90" r="9" fill="#2a1d15"/><circle cx="122" cy="90" r="9" fill="#2a1d15"/>
+      <circle cx="81" cy="87" r="3" fill="#fff"/><circle cx="125" cy="87" r="3" fill="#fff"/>
+      <ellipse cx="100" cy="118" rx="13" ry="9" fill="#231a15"/><ellipse cx="96" cy="115" rx="4" ry="2.4" fill="#fff" opacity=".5"/>
+      <path d="M100 127v8M100 135q-10 8-18 2M100 135q10 8 18 2" stroke="#3a2a20" stroke-width="2.4" fill="none" stroke-linecap="round"/>
+      <path d="M92 140q8 16 16 0z" fill="#e07a83"/></svg>`;
+  }
+
+  // ---------- Алгоритм підбору (як у додатку Б) ----------
+  const sp = (p, a) => p.species === "any" ? 1 : a.species === p.species ? 1 : (p.allowOther ? .5 : 0);
+  const ac = (p, a) => r2(Math.max(0, 1 - Math.abs(p.activity - a.act)));
+  const ex = (p, a) => { const g = a.exp - p.exp; return g <= 0 ? 1 : Math.max(0, 1 - .5 * g); };
+  const tm = (p, a) => a.care <= 0 ? 1 : r2(Math.min(1, p.time / a.care));
+  const ag = (p, a) => { const [lo, hi] = p.age; if (a.age < lo || a.age > hi) return 0; const mid = (lo + hi) / 2, h = (hi - lo) / 2 || 1; return r2(1 - .5 * Math.abs(a.age - mid) / h); };
+  const st = a => r2(Math.min(1, a.intake / 180));
+  const partial = (p, a) => ({ species: sp(p, a), activity: ac(p, a), exp: ex(p, a), time: tm(p, a), age: ag(p, a), stay: st(a) });
+
+  function hard(p, a) {
+    if (a.status !== "available") return a.status === "booked" ? "уже заброньована на зустріч" : "уже усиновлена";
+    if (p.kids && !a.kids) return "несумісна з дітьми";
+    if (p.pets && !a.pets) return "несумісна з іншими тваринами";
+    if (a.size === "large" && !p.large) return "великий розмір, а подвір'я немає";
+    if (p.species !== "any" && !p.allowOther && a.species !== p.species) return "інший вид тварини";
+    if (p.size && a.size !== p.size) return "інший розмір";
+    if (p.breed === "mix" && a.pure) return "породиста, а обрано безпородну";
+    if (p.breed === "pure" && !a.pure) return "безпородна, а обрано породисту";
+    return null;
+  }
+  const PH = {
+    species: v => v === 1 ? "Повна відповідність бажаному виду" : "Допустимий вид тварини",
+    activity: v => v >= .9 ? "Дуже близький рівень активності" : "Підходить за рівнем активності",
+    exp: () => "Відповідає вашому досвіду",
+    time: () => "Догляд вкладається у ваш вільний час",
+    age: () => "Підходящий вік",
+    stay: () => "Довго чекає на дім"
+  };
+  function recommend(p, w, b) {
+    const items = [], excluded = [];
+    for (const a of ANIMALS) {
+      const why = hard(p, a);
+      if (why) { excluded.push({ a, why }); continue; }
+      const part = partial(p, a), con = {};
+      CRIT.forEach(c => con[c.code] = (w[c.code] || 0) * part[c.code]);
+      const base = Object.values(con).reduce((s, x) => s + x, 0);
+      const score = Math.round(Math.min(1, base + (a.prio ? b : 0)) * 1000) / 1000;
+      const top = CRIT.map(c => c.code).sort((x, y) => con[y] - con[x]).slice(0, 3);
+      const reasons = top.map(c => PH[c](part[c]));
+      if (p.kids && a.kids) reasons.push("Сумісна з дітьми");
+      if (p.pets && a.pets) reasons.push("Добре ладнає з іншими тваринами");
+      if (a.prio) reasons.push("Евакуйована, потребує невідкладного влаштування");
+      items.push({ a, part, base, score, reasons });
+    }
+    items.sort((x, y) => y.score - x.score);
+    items.forEach((r, i) => r.rank = i + 1);
+    return { items, excluded };
+  }
+
+  // ---------- Анкета ----------
+  function readProfile() {
+    const [lo, hi] = $("age").value.split("-").map(Number);
+    return {
+      housing: $("housing").value, large: $("yard").value === "1" || $("housing").value === "house" && $("yard").value === "1",
+      exp: +$("exp").value, kids: $("kids").value === "1", pets: $("pets").value === "1",
+      species: $("species").value, allowOther: $("allowOther").checked, size: $("size").value, age: [lo, hi],
+      activity: +$("activity").value, breed: $("breed").value, time: +$("time").value
+    };
+  }
+  $("form").addEventListener("submit", e => {
+    e.preventDefault();
+    if (!$("consent").checked) { $("formErr").textContent = "Щоб продовжити, дайте згоду на обробку даних анкети."; return; }
+    $("formErr").textContent = "";
+    profile = readProfile(); shown = 5; go("rekomendacii");
+  });
+
+  // ---------- Рекомендації ----------
+  const openDetails = new Set();
+  function sortItems(items) {
+    const m = $("sort").value, arr = items.slice();
+    if (m === "prio") arr.sort((x, y) => (!!y.a.prio - !!x.a.prio) || y.score - x.score);
+    if (m === "stay") arr.sort((x, y) => y.a.intake - x.a.intake);
+    return arr;
+  }
+  function renderRecs() {
+    if (!profile) { go("anketa"); return; }
+    const { items, excluded } = recommend(profile, W, BONUS);
+    const p = profile;
+    $("chips").innerHTML = [
+      p.housing === "apartment" ? "квартира" : "приватний будинок", p.large ? "є подвір'я" : "без подвір'я",
+      p.kids ? "є діти" : "без дітей", p.pets ? "є інші тварини" : "без інших тварин",
+      { cat: "шукаю кота", dog: "шукаю собаку", any: "вид не важливий" }[p.species],
+      "активність: " + ACT_UA(p.activity), $("time").selectedOptions[0].text.toLowerCase() + " на день"
+    ].map(t => `<span class="chip">${t}</span>`).join("");
+    if (!items.length) {
+      $("recLead").textContent = "Відповідних тварин не знайдено. Спробуйте змінити анкету.";
+      $("cards").innerHTML = ""; $("more").innerHTML = "";
+    } else {
+      const n = Math.min(shown, items.length);
+      $("recLead").textContent = `Ми підібрали для вас ${items.length} ${items.length === 1 ? "тварину" : items.length < 5 ? "тварини" : "тварин"}, які найбільше підходять до вашого профілю. Показано ${n}.`;
+      const list = sortItems(items).slice(0, shown);
+      $("cards").innerHTML = list.map(r => card(r)).join("");
+      const rest = items.length - shown;
+      $("more").innerHTML = rest > 0 ? `<button class="btn link" type="button" id="showMore">Показати ще ${Math.min(rest, 5)} ${rest === 1 ? "тварину" : rest < 5 ? "тварини" : "тварин"} ⌄</button>` : "";
+    }
+    const exb = $("excluded");
+    if (excluded.length) {
+      exb.hidden = false;
+      exb.innerHTML = `<h2>Не підійшли за обов'язковими умовами (${excluded.length})</h2><ul>${excluded.map(x => `<li><b>${esc(x.a.name)}</b>: ${x.why}</li>`).join("")}</ul>`;
+    } else exb.hidden = true;
+  }
+  function card(r) {
+    const a = r.a, open = openDetails.has(a.id);
+    const bars = CRIT.map(c => `<div class="barrow"><span>${c.name}</span><div class="track"><div class="fill" style="width:${Math.round(r.part[c.code] * 100)}%"></div></div><span class="v">${fmt(r.part[c.code])} × ${fmt(W[c.code])}</span></div>`).join("");
+    return `<article class="card">
+      <div class="photo">${portrait(a)}</div>
+      <div style="min-width:0"><h3>${esc(a.name)}${a.prio ? '<span class="badge">Пріоритет</span>' : ""}</h3>
+        <p class="meta">${SP_UA(a)} · ${ageUa(a.age)} · ${SIZE_UA[a.size]}</p></div>
+      <div class="pct"><b>${Math.round(r.score * 100)}%</b><small>Сумісність</small></div>
+      <div class="why"><p>Чому саме ${esc(a.name)}?</p><ul>${r.reasons.slice(0, 3).map(t => `<li>${t}</li>`).join("")}</ul></div>
+      ${open ? `<div class="details"><dl>
+          <dt>Порода</dt><dd>${esc(a.breed)}</dd><dt>Темперамент</dt><dd>${ACT_UA(a.act)}</dd>
+          <dt>Притулок</dt><dd>${SH[a.shelter]}</dd><dt>У притулку</dt><dd>${a.intake} дн.</dd>
+          ${a.prio ? `<dt>Статус</dt><dd>${esc(a.prio)}</dd>` : ""}<dt>Про тварину</dt><dd>${esc(a.desc)}</dd></dl>
+          <div class="bars">${bars}</div>
+          <p class="calc">Сума внесків ${fmt(r.base)}${a.prio ? ` + бонус пріоритету ${fmt(BONUS)}` : ""} = ${fmt(r.score)}${r.base + (a.prio ? BONUS : 0) > 1 ? " (обмежено до 1)" : ""}</p></div>` : ""}
+      <div class="acts"><button class="btn primary" type="button" data-more="${a.id}" aria-expanded="${open}">${open ? "Згорнути" : "Детальніше"}</button><button class="btn ghost" type="button" data-book="${a.id}">Записатися</button></div>
+    </article>`;
+  }
+  $("sort").addEventListener("change", renderRecs);
+  $("more").addEventListener("click", e => { if (e.target.id === "showMore") { shown += 5; renderRecs(); } });
+  $("cards").addEventListener("click", e => {
+    const m = e.target.closest("[data-more]");
+    if (m) { const id = +m.dataset.more; openDetails.has(id) ? openDetails.delete(id) : openDetails.add(id); renderRecs(); return; }
+    const b = e.target.closest("[data-book]");
+    if (b) { chosen = ANIMALS.find(a => a.id === +b.dataset.book); meeting = null; go("zustrich"); }
+  });
+
+  // ---------- Зустріч ----------
+  function petMini(a, r) {
+    return `<div class="photo">${portrait(a)}</div><h3>${esc(a.name)}${a.prio ? '<span class="badge">Пріоритет</span>' : ""}</h3>
+      <p class="meta">${SP_UA(a)} · ${ageUa(a.age)} · ${SIZE_UA[a.size]} · ${esc(a.breed)}<br>${SH[a.shelter]}</p>
+      ${r ? `<p class="meta"><b style="color:var(--accent);font-size:18px">${Math.round(r.score * 100)}%</b> сумісності</p>` : ""}
+      <p style="margin:0;font-size:14px">${esc(a.desc)}</p>`;
+  }
+  const findRes = a => profile ? recommend(profile, W, BONUS).items.find(r => r.a.id === a.id) : null;
+  function renderMeet() {
+    if (!chosen) { go(profile ? "rekomendacii" : "anketa"); return; }
+    $("meetPet").innerHTML = petMini(chosen, findRes(chosen));
+    if (meeting) {
+      $("meetBox").innerHTML = `<div class="ok-box"><b>Запис підтверджено.</b> ${esc(chosen.name)} чекатиме на вас ${meeting.date} о ${meeting.time} у притулку «${SH[chosen.shelter].split("«")[1]}. Тварину заброньовано, і вона зникла з рекомендацій інших користувачів.</div>
+        <ol class="timeline">
+          <li class="done"><span class="tdot">✓</span><div>Анкету заповнено<small>профіль збережено в системі</small></div></li>
+          <li class="done"><span class="tdot">✓</span><div>Тварину обрано з рекомендацій</div></li>
+          <li class="done"><span class="tdot">✓</span><div>Записано на зустріч<small>${meeting.date}, ${meeting.time}</small></div></li>
+          <li><span class="tdot">4</span><div>Знайомство в притулку та рішення про усиновлення</div></li>
+        </ol>
+        <div class="btn-row">
+          <button class="btn primary" type="button" id="meetYes">Зустріч відбулася, оформити усиновлення</button>
+          <button class="btn" type="button" id="meetNo">Не підійшли одне одному</button>
+        </div>`;
+      return;
+    }
+    const d0 = new Date(TODAY.getTime() + 2 * 864e5).toISOString().slice(0, 10);
+    $("meetBox").innerHTML = `<form id="meetForm" novalidate>
+      <div class="fields">
+        <div class="f"><label for="mDate">Дата візиту</label><input class="inp" type="date" id="mDate" value="${d0}" min="${TODAY.toISOString().slice(0, 10)}"></div>
+        <div class="f"><span style="font-size:13px;font-weight:600;color:var(--muted)">Час</span><div class="slots" role="radiogroup" aria-label="Час">
+          ${["10:00", "11:30", "13:00", "15:00", "16:30"].map((t, i) => `<label><input type="radio" name="slot" value="${t}" ${i === 1 ? "checked" : ""}><span>${t}</span></label>`).join("")}</div></div>
+        <div class="f"><label for="mName">Ваше ім'я</label><input class="inp" id="mName" autocomplete="name" placeholder="Наприклад, Олена"></div>
+        <div class="f"><label for="mPhone">Телефон або e-mail</label><input class="inp" id="mPhone" autocomplete="tel" placeholder="+380 …"></div>
+      </div>
+      <p class="err" id="meetErr" role="alert"></p>
+      <div class="btn-row"><button class="btn primary" type="submit">Підтвердити запис</button><button class="btn" type="button" data-go="rekomendacii">Назад до рекомендацій</button></div>
+    </form>`;
+  }
+  $("meetBox").addEventListener("submit", e => {
+    e.preventDefault();
+    if (!$("mName").value.trim() || !$("mPhone").value.trim()) { $("meetErr").textContent = "Вкажіть ім'я та контакт, щоб притулок міг підтвердити зустріч."; return; }
+    if (chosen.status !== "available") { $("meetErr").textContent = "Цю тварину вже заброньовано. Оберіть іншу."; return; }
+    chosen.status = "booked";
+    meeting = { date: new Date($("mDate").value || TODAY).toLocaleDateString("uk-UA"), time: document.querySelector('input[name="slot"]:checked').value, name: $("mName").value.trim() };
+    renderMeet(); renderTable();
+  });
+  $("meetBox").addEventListener("click", e => {
+    if (e.target.id === "meetYes") go("usynovlennia");
+    if (e.target.id === "meetNo") { chosen.status = "available"; chosen = null; meeting = null; renderTable(); go("rekomendacii"); }
+  });
+
+  // ---------- Усиновлення ----------
+  let adopted = false;
+  function renderAdopt() {
+    if (!chosen || !meeting) { go(profile ? "rekomendacii" : "anketa"); return; }
+    $("adoptPet").innerHTML = petMini(chosen, null);
+    if (adopted) {
+      $("adoptLead").textContent = `Вітаємо, ${chosen.name} їде додому!`;
+      $("adoptBox").innerHTML = `<div class="ok-box"><b>Усиновлення оформлено.</b> Статус тварини змінено на «усиновлена». Через 1, 3 і 6 місяців система надішле коротке опитування про те, як минає адаптація.</div>
+        <div class="btn-row"><button class="btn" type="button" id="returnPet">Повернути тварину до притулку</button><button class="btn primary" type="button" data-go="anketa">На головну</button></div>`;
+      return;
+    }
+    $("adoptLead").textContent = "Залишився останній крок: підтвердити рішення та ознайомитися з умовами утримання.";
+    $("adoptBox").innerHTML = `<form id="adoptForm" novalidate><div class="fields">
+        <label class="check"><input type="checkbox" id="c1"> Ознайомився(-лася) з медичною картою та рекомендаціями щодо годування</label>
+        <label class="check"><input type="checkbox" id="c2"> Зобов'язуюся забезпечити належні умови утримання та ветеринарний догляд</label>
+        <label class="check"><input type="checkbox" id="c3"> Погоджуюся на опитування притулку після усиновлення</label>
+      </div><p class="err" id="adErr" role="alert"></p>
+      <div class="btn-row"><button class="btn primary" type="submit">Підтвердити усиновлення</button></div></form>`;
+  }
+  $("adoptBox").addEventListener("submit", e => {
+    e.preventDefault();
+    if (!$("c1").checked || !$("c2").checked) { $("adErr").textContent = "Підтвердьте перші дві умови."; return; }
+    chosen.status = "adopted"; adopted = true; renderAdopt(); renderTable();
+  });
+  $("adoptBox").addEventListener("click", e => {
+    if (e.target.id === "returnPet") {
+      chosen.status = "available"; chosen.intake = 0;
+      $("adoptBox").innerHTML = `<div class="ok-box"><b>Повернення зареєстровано.</b> ${esc(chosen.name)} знову доступна для усиновлення, а причину повернення персонал притулку врахує під час аналізу ваг критеріїв.</div>
+        <div class="btn-row"><button class="btn primary" type="button" data-go="anketa">На головну</button></div>`;
+      chosen = null; meeting = null; adopted = false; renderTable();
+    }
+  });
+
+  // ---------- Адміністратор ----------
+  function renderWeights() {
+    $("wrows").innerHTML = CRIT.map(c => `<div class="wrow"><label for="w-${c.code}">${c.name}</label><output id="o-${c.code}">${fmt(dW[c.code])}</output><input type="range" id="w-${c.code}" data-code="${c.code}" min="0" max="0.6" step="0.05" value="${dW[c.code]}"></div>`).join("");
+    $("w-bonus").value = dB; $("o-bonus").textContent = fmt(dB); updSum();
+  }
+  function updSum() {
+    const s = Object.values(dW).reduce((a, b) => a + b, 0), ok = Math.abs(s - 1) < 1e-6;
+    $("sumBox").className = "sum " + (ok ? "ok" : "bad");
+    $("sumBox").innerHTML = `<span>Сума ваг</span><span>${fmt(r2(s))}${ok ? "" : " · має бути 1,00"}</span>`;
+    $("apply").disabled = !ok;
+  }
+  $("wrows").addEventListener("input", e => { const c = e.target.dataset.code; if (!c) return; dW[c] = r2(+e.target.value); $("o-" + c).textContent = fmt(dW[c]); updSum(); renderPreview(); });
+  $("w-bonus").addEventListener("input", e => { dB = r2(+e.target.value); $("o-bonus").textContent = fmt(dB); renderPreview(); });
+  $("normalize").addEventListener("click", () => {
+    const s = Object.values(dW).reduce((a, b) => a + b, 0); if (!s) return; let acc = 0;
+    CRIT.forEach((c, i) => { if (i < CRIT.length - 1) { dW[c.code] = r2(dW[c.code] / s); acc += dW[c.code]; } else dW[c.code] = r2(1 - acc); });
+    renderWeights(); renderPreview();
+  });
+  $("reset").addEventListener("click", () => { dW = { ...BASE_W }; dB = BASE_BONUS; renderWeights(); renderPreview(); });
+  $("apply").addEventListener("click", () => { W = { ...dW }; BONUS = dB; $("wLog").textContent = `Ваги застосовано о ${new Date().toLocaleTimeString("uk-UA")}. Рекомендації вже рахуються з новими значеннями.`; renderPreview(); });
+  function renderPreview() {
+    const p = profile || readProfile();
+    const now = recommend(p, W, BONUS).items.slice(0, 5), nxt = recommend(p, dW, dB).items.slice(0, 5), pos = {};
+    now.forEach((r, i) => pos[r.a.id] = i + 1);
+    $("preview").innerHTML = nxt.map((r, i) => { const o = pos[r.a.id]; const d = !o ? "нова в п'ятірці" : o > i + 1 ? `↑ з ${o}-ї позиції` : o < i + 1 ? `↓ з ${o}-ї позиції` : "";
+      return `<li><b>${esc(r.a.name)}</b> · ${Math.round(r.score * 100)}%${r.a.prio ? " · пріоритет" : ""} ${d ? `<span class="delta">(${d})</span>` : ""}</li>`; }).join("") || "<li>Жодна тварина не проходить обов'язкові умови.</li>";
+  }
+  const ST_UA = { available: "доступна", booked: "заброньована", adopted: "усиновлена" };
+  function renderTable() {
+    $("tbody").innerHTML = ANIMALS.map(a => `<tr><td><b>${esc(a.name)}</b></td><td>${a.species === "dog" ? "собака" : "кіт"}</td><td>${ageUa(a.age)}</td><td>${SIZE_UA[a.size].toLowerCase()}</td><td>${ACT_UA(a.act)}</td><td>${a.intake} дн.</td><td>${a.prio ? "так" : "—"}</td><td><span class="st ${a.status}">${ST_UA[a.status]}</span></td></tr>`).join("");
+  }
+  $("resetStatus").addEventListener("click", () => { ANIMALS.forEach(a => a.status = a.status0); chosen = null; meeting = null; adopted = false; renderTable(); renderPreview(); });
+
+  // ---------- Навігація ----------
+  const VIEWS = { anketa: 1, rekomendacii: 2, zustrich: 3, usynovlennia: 4, admin: 0 };
+  let cur = "anketa";
+  function go(v) {
+    cur = v;
+    Object.keys(VIEWS).forEach(k => $("v-" + k).hidden = k !== v);
+    const s = VIEWS[v];
+    $("stepper").hidden = s === 0;
+    document.querySelectorAll("#stepper li").forEach(li => { const n = +li.dataset.s; li.className = n < s ? "done" : n === s ? "on" : ""; if (n === s) li.setAttribute("aria-current", "step"); else li.removeAttribute("aria-current"); });
+    if (v === "rekomendacii") renderRecs();
+    if (v === "zustrich") renderMeet();
+    if (v === "usynovlennia") renderAdopt();
+    if (v === "admin") { renderWeights(); renderPreview(); renderTable(); }
+    window.scrollTo(0, 0);
+  }
+  document.addEventListener("click", e => {
+    const g = e.target.closest("[data-go]");
+    if (g) { $("menu").hidden = true; $("menuBtn").setAttribute("aria-expanded", "false"); go(g.dataset.go); }
+  });
+  $("menuBtn").addEventListener("click", e => { e.stopPropagation(); const m = $("menu"); m.hidden = !m.hidden; $("menuBtn").setAttribute("aria-expanded", String(!m.hidden)); });
+  document.addEventListener("click", e => { if (!e.target.closest("#menu") && !e.target.closest("#menuBtn")) { $("menu").hidden = true; $("menuBtn").setAttribute("aria-expanded", "false"); } });
+  $("brand").addEventListener("click", () => go("anketa"));
+  renderTable(); go("anketa");
+})();
+</script>
+</body>
+</html>
